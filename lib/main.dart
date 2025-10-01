@@ -30,6 +30,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: _themeMode,
@@ -43,7 +44,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-// ---------------- Tabs with Swipe ----------------
+// Tabs with Swipe
 class HomePage extends StatelessWidget {
   final ThemeMode themeMode;
   final VoidCallback onToggleTheme;
@@ -64,7 +65,7 @@ class HomePage extends StatelessWidget {
       builder: (context) {
         Color pickerColor = textColor;
         return AlertDialog(
-          title: Text('Pick Text Color'),
+          title: const Text('Pick Text Color'),
           content: SingleChildScrollView(
             child: ColorPicker(
               pickerColor: pickerColor,
@@ -75,11 +76,11 @@ class HomePage extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              child: Text('Select'),
+              child: const Text('Select'),
               onPressed: () {
                 onChangeTextColor(pickerColor);
                 Navigator.of(context).pop();
@@ -96,13 +97,13 @@ class HomePage extends StatelessWidget {
     bool isDarkMode = themeMode == ThemeMode.dark;
 
     return DefaultTabController(
-      length: 2,
+      length: 3, // three tabs
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Swipe Between Screens"),
+          title: const Text("Swipe Between Screens"),
           actions: [
             IconButton(
-              icon: Icon(Icons.color_lens),
+              icon: const Icon(Icons.color_lens),
               onPressed: () => _openColorPicker(context),
             ),
             IconButton(
@@ -110,10 +111,11 @@ class HomePage extends StatelessWidget {
               onPressed: onToggleTheme,
             ),
           ],
-          bottom: TabBar(
+          bottom: const TabBar(
             tabs: [
               Tab(text: "Fade Toggle"),
               Tab(text: "Auto Fade"),
+              Tab(text: "Image Frame"),
             ],
           ),
         ),
@@ -121,6 +123,9 @@ class HomePage extends StatelessWidget {
           children: [
             FadingTextAnimation1(textColor: textColor),
             FadingTextAnimation2(textColor: textColor),
+            RoundedImageToggle(
+              imagePath: 'assets/gum.png',
+            ),
           ],
         ),
       ),
@@ -128,10 +133,10 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// ---------------- First Tab ----------------
+// First Tab
 class FadingTextAnimation1 extends StatefulWidget {
   final Color textColor;
-  FadingTextAnimation1({required this.textColor});
+  const FadingTextAnimation1({required this.textColor});
 
   @override
   _FadingTextAnimation1State createState() => _FadingTextAnimation1State();
@@ -154,16 +159,16 @@ class _FadingTextAnimation1State extends State<FadingTextAnimation1> {
         children: [
           AnimatedOpacity(
             opacity: _isVisible ? 1.0 : 0.0,
-            duration: Duration(seconds: 1),
+            duration: const Duration(seconds: 2),
             child: Text(
-              'Hello, Flutter!',
+              'Hello, Humans!',
               style: TextStyle(fontSize: 24, color: widget.textColor),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           FloatingActionButton(
             onPressed: toggleVisibility,
-            child: Icon(Icons.play_arrow),
+            child: const Icon(Icons.play_arrow),
           ),
         ],
       ),
@@ -171,10 +176,10 @@ class _FadingTextAnimation1State extends State<FadingTextAnimation1> {
   }
 }
 
-// ---------------- Second Tab ----------------
+// Second Tab
 class FadingTextAnimation2 extends StatefulWidget {
   final Color textColor;
-  FadingTextAnimation2({required this.textColor});
+  const FadingTextAnimation2({required this.textColor});
 
   @override
   _FadingTextAnimation2State createState() => _FadingTextAnimation2State();
@@ -189,7 +194,7 @@ class _FadingTextAnimation2State extends State<FadingTextAnimation2>
   void initState() {
     super.initState();
     _controller =
-        AnimationController(vsync: this, duration: Duration(seconds: 2));
+        AnimationController(vsync: this, duration: const Duration(seconds: 3));
     _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.repeat(reverse: true);
   }
@@ -206,9 +211,63 @@ class _FadingTextAnimation2State extends State<FadingTextAnimation2>
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: Text(
-          'This fades in and out!',
-          style: TextStyle(fontSize: 24, color: widget.textColor),
+          'Boo!',
+          style: TextStyle(fontSize: 48, color: widget.textColor),
         ),
+      ),
+    );
+  }
+}
+
+// Third Tab: Image with Rounded Corners + Frame Toggle ONLY
+class RoundedImageToggle extends StatefulWidget {
+  final String imagePath;
+  const RoundedImageToggle({Key? key, required this.imagePath})
+      : super(key: key);
+
+  @override
+  _RoundedImageToggleState createState() => _RoundedImageToggleState();
+}
+
+class _RoundedImageToggleState extends State<RoundedImageToggle> {
+  bool _showFrame = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border:
+                  _showFrame ? Border.all(color: Colors.blue, width: 4) : null,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset(
+              widget.imagePath,
+              width: 200,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Show Frame"),
+              Switch(
+                value: _showFrame,
+                onChanged: (value) {
+                  setState(() {
+                    _showFrame = value;
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
